@@ -1,7 +1,7 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
 interface AlarmAttributes {
-    id: number;
+    id?: number;
     time: string;
     description: string;
     days: string;
