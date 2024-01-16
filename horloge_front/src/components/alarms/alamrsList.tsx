@@ -2,11 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {Button, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import alarmsApiService from "../../services/alarmsApiServices";
 import AddAlarm from "./addAlarm";
+import {daysString} from "../../helpers/stringHelpers";
 
 interface TableRowData {
     id: number;
     time: string;
-    days: string;
+    days: string[];
     description: string;
     active: boolean;
 }
@@ -25,6 +26,28 @@ const ListAlarm: React.FC = () => {
             setDataAlarms(result?.data?.alarms)
         })
     }
+
+    const handleSwitchChange = (id: number) => {
+        // Effectuez l'appel API pour mettre à jour le statut actif de l'alarme avec l'ID spécifié
+        const updatedDataAlarms = [...dataAlarms];
+        const alarmToUpdate = updatedDataAlarms.find((alarm) => alarm.id === id);
+        if (alarmToUpdate) {
+            // Inverser le statut localement
+            const status = !alarmToUpdate.active;
+            alarmToUpdate.active = status;
+            alarmsApiService.updateAlarmStatus(id, status)
+                .then((result) => {
+                    console.log('result', result);
+                    setDataAlarms(updatedDataAlarms);
+                })
+                .catch((error) => {
+                    alarmToUpdate.active = !alarmToUpdate.active;
+                    setDataAlarms(updatedDataAlarms);
+                    console.error('Error updating alarm status:', error);
+                });
+        }
+    };
+
     return (
         <div>
             {modalVisible && <AddAlarm modalAdd={modalVisible} setModal={setModalVisible}/>}
@@ -44,15 +67,15 @@ const ListAlarm: React.FC = () => {
                     {dataAlarms.map((row:TableRowData) => (
                         <TableRow key={row.id}>
                             <TableCell>{row.time}</TableCell>
-                            <TableCell>{row.days}</TableCell>
+                            <TableCell>{daysString(row.days)}</TableCell>
                             <TableCell>{row.description}</TableCell>
                             <TableCell>
                                 <Switch
                                     checked={row.active}
-                                    //onChange={handleChange}
+                                    onChange={() => handleSwitchChange(row.id)}
                                     inputProps={{ 'aria-label': 'controlled' }}
                                 />
-                                {row.active}</TableCell>
+                                {row.active ? 'Active' : 'Inactive'}</TableCell>
                             <TableCell>
                                 {/*<Button variant="contained" onClick={() => handleClick(row.id)}>Click me</Button>*/}
                                 {/*<Button variant="contained" onClick={() => handleClick(row.id)}>Click me</Button>*/}

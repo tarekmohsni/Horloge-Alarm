@@ -23,6 +23,12 @@ class AlarmService {
     deleteAlarm(alarm_id: number): Promise<AxiosResponse<any>> {
         return axios.delete(`http://localhost:2000/api/alarm/${alarm_id}`);
     }
+
+    updateAlarmStatus(alarm_id: number, active: boolean): Promise<AxiosResponse<any>> {
+        console.log('active', active,alarm_id)
+        return axios.patch(`http://localhost:2000/api/alarm/${alarm_id}`, { active });
+    }
+
 }
 
 const alarmsApiService = new AlarmService();

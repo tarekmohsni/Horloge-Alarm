@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Alert,
     Button, Checkbox,
     Dialog,
     DialogActions,
@@ -27,6 +28,9 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [description, setDescription] = useState<string>('');
+    const [showAlert, setShowAlert] = useState<boolean>(false);
+    const [alertMessage, setAlertMessage] = useState<string>('');
+
     const handleClose = () => {
         setModal(!modalAdd);
     };
@@ -40,6 +44,17 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
     };
 
     const handleAddNewAlarm =()=>{
+        if (!selectedTime) {
+            setAlertMessage('Le temps est requis.');
+            setShowAlert(true);
+            return;
+        }
+
+        if (!selectedDays.length) {
+            setAlertMessage('Au moins un jour doit être sélectionné.');
+            setShowAlert(true);
+            return;
+        }
         const objAlarm={
             time: dayjs(selectedTime).format('HH:mm'),
             days: selectedDays,
@@ -48,9 +63,9 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
         console.log("selectedTime", typeof selectedTime)
         console.log('dataaa', objAlarm)
 
-        // alarmsApiService.addAlarm(objAlarm).then(result=>{
-        //
-        // })
+        alarmsApiService.addAlarm(objAlarm).then(result=>{
+            console.log("result", result)
+        })
     }
 
     const handleTimeChange = (newTime:any) => {
@@ -68,6 +83,11 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
             onClose={handleClose}
             aria-describedby="alert-dialog-slide-description"
         >
+            {showAlert && (
+                <Alert severity="error" onClose={() => setShowAlert(false)}>
+                    {alertMessage}
+                </Alert>
+            )}
             <DialogTitle>{"Use Google's location service?"}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-slide-description">
@@ -117,6 +137,7 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
                 <Button onClick={handleClose}>Close</Button>
                 <Button onClick={handleAddNewAlarm}>Add Alarm</Button>
             </DialogActions>
+
         </Dialog>
     )
 
