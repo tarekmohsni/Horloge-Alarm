@@ -92,7 +92,7 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
             <DialogContent>
                 <DialogContentText id="alert-dialog-slide-description">
                     <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                        <Grid item xs={12}>
+                        <Grid item xs={6}>
                     <label className="label">Time:</label>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DemoContainer components={['TimePicker']}>

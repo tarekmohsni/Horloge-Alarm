@@ -1,8 +1,21 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
+import {
+    Button,
+    Dialog, DialogActions, DialogContent, DialogContentText,
+    DialogTitle,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
+} from '@mui/material';
 import alarmsApiService from "../../services/alarmsApiServices";
 import AddAlarm from "./addAlarm";
 import {daysString} from "../../helpers/stringHelpers";
+import '../../styles/style.css'
+import dayjs from "dayjs";
 
 interface TableRowData {
     id: number;
@@ -15,10 +28,68 @@ interface TableRowData {
 const ListAlarm: React.FC = () => {
     const [dataAlarms, setDataAlarms]= useState<TableRowData[]>([])
     const [modalVisible, setModalVisible]= useState<boolean>(false)
+    const [modalDelete, setModalDelete]= useState<boolean>(false)
+    const [alarmIDToDelete, setAlarmIDToDelete]= useState<number>(0)
 
     useEffect(() => {
+
         getAllAlarms()
     }, []);
+
+    useEffect(() => {
+
+        const intervalId = scheduleNextMinute();
+
+        // Nettoyer le planificateur à la sortie du composant
+        return () => {
+            clearTimeout(intervalId);
+        };
+    }, [dataAlarms]);
+
+    const checkAlarmTimes = () => {
+        dataAlarms
+            .filter((row) => row.active) // Filtrer uniquement les alarmes actives
+            .forEach((row) => {
+                if (isAlarmTime(row.time, row.days)) {
+                    console.log('Time', row.time);
+                    showNotification(row.description);
+                }
+            });
+    };
+
+    const scheduleNextMinute = () => {
+        const now = dayjs();
+        const nextMinute = now.add(1, 'minute').startOf('minute');
+        const timeUntilNextMinute = nextMinute.diff(now);
+
+        return setTimeout(() => {
+            checkAlarmTimes();
+            scheduleNextMinute();
+        }, timeUntilNextMinute);
+    };
+
+    const showNotification = (alarmDescription: string) => {
+        if ('Notification' in window) {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    new Notification(`Alarm: ${alarmDescription}`, {
+                        body: 'It\'s time for your alarm!',
+                    });
+                }
+            });
+        }
+    };
+
+    const isAlarmTime = (alarmTime: string, days: string[]) => {
+        const currentTime = dayjs();
+        const day = currentTime.format('dddd');
+        const formattedTime = currentTime.format('HH:mm');
+        const isDay=days.includes(day)
+        console.log('isDay', isDay)
+        console.log('currentTime', formattedTime)
+         console.log(alarmTime === formattedTime)
+         return isDay && alarmTime === formattedTime ;
+    };
 
     const getAllAlarms =()=>{
         alarmsApiService.getAlarms({}).then(result=>{
@@ -48,9 +119,42 @@ const ListAlarm: React.FC = () => {
         }
     };
 
+    const handleEditAlarm =()=>{
+
+    }
+
+    const handleDeleteAlarm =(alarm_id:number)=>{
+        setModalDelete(!modalDelete);
+        setAlarmIDToDelete(alarm_id)
+    }
+
+    const deleteAlarm=()=>{
+        alarmsApiService.deleteAlarm(alarmIDToDelete).then(result=>{
+
+        })
+    }
+
     return (
         <div>
             {modalVisible && <AddAlarm modalAdd={modalVisible} setModal={setModalVisible}/>}
+            {modalDelete && <Dialog
+                open={modalDelete}
+                keepMounted
+                onClose={()=>setModalDelete(!modalDelete)}
+                aria-describedby="alert-dialog-slide-description"
+            >
+                <DialogTitle>{"Use Google's location service?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-slide-description">
+                        Let Google help apps determine location. This means sending anonymous
+                        location data to Google, even when no apps are running.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={()=>setModalDelete(!modalDelete)}>Cancel</Button>
+                    <Button onClick={deleteAlarm}>Delete</Button>
+                </DialogActions>
+            </Dialog>}
         <TableContainer>
             <Button variant="contained" onClick={()=>setModalVisible(!modalVisible)}>Ajouter Alarm</Button>
             <Table>
@@ -77,8 +181,8 @@ const ListAlarm: React.FC = () => {
                                 />
                                 {row.active ? 'Active' : 'Inactive'}</TableCell>
                             <TableCell>
-                                {/*<Button variant="contained" onClick={() => handleClick(row.id)}>Click me</Button>*/}
-                                {/*<Button variant="contained" onClick={() => handleClick(row.id)}>Click me</Button>*/}
+                                <Button className="ms-2" variant="contained" onClick={() => handleEditAlarm()}>Edit</Button>
+                                <Button className="ms-2" variant="contained" onClick={() => handleDeleteAlarm(row.id)}>Delete</Button>
                             </TableCell>
                         </TableRow>
                     ))}
