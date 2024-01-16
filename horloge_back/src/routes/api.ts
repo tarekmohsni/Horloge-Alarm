@@ -5,12 +5,9 @@ import alarmController from '../controllers/alarmController';
 let router = Router();
 
 let apiRouters = function () {
-    // ... other routes
-
     router.post('/api/alarm/save', alarmController.addAlarm);
     router.get('/api/alarms', alarmController.getAllAlarm);
-
-    // ... other routes
+    router.delete('/api/alarm/:alarm_id', alarmController.deleteAlarm)
 
     return router;
 };

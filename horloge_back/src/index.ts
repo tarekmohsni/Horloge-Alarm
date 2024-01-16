@@ -5,7 +5,7 @@ import apiRoutes from './routes/api';
 
 
 const app = express();
-const PORT = 3000;
+const PORT = 2000;
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));

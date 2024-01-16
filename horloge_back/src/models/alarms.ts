@@ -4,14 +4,15 @@ interface AlarmAttributes {
     id?: number;
     time: string;
     description: string;
-    days: string;
+    days: string[];
+    active?: boolean
 }
-
 class Alarm extends Model<AlarmAttributes> implements AlarmAttributes {
     public id!: number;
     public time!: string;
     public description!: string;
-    public days!: string;
+    public days!: string[];
+    public active!: boolean
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
@@ -34,9 +35,14 @@ const initAlarmModel = (sequelize: Sequelize) => {
                 allowNull: true,
             },
             days: {
-                type: DataTypes.STRING,
-                allowNull: true,
+                type: DataTypes.ARRAY(DataTypes.TEXT),
+                allowNull: true
             },
+            active:{
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: true
+            }
         },
         {
             sequelize,
