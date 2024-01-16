@@ -12,5 +12,8 @@ export = {
     },
     deleteAlarm:(req: Request, res: Response, next: NextFunction)=>{
         _alarmBo.deleteAlarm(req, res, next)
+    },
+    updateAlarmStatus:(req: Request, res: Response, next:NextFunction)=>{
+        _alarmBo.updateAlarmStatus(req, res, next)
     }
 };

@@ -64,6 +64,40 @@ class AlarmBo {
             });
         }
     }
+
+    async updateAlarmStatus(req: Request, res: Response, next: NextFunction) {
+        try {
+            const alarm_id = req.params.alarm_id;
+            const { active } = req.body;
+
+            if (active === undefined) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Please provide the "active" status',
+                });
+            }
+
+            await models.Alarm.update(
+                { active },
+                {
+                    where: {
+                        id: alarm_id
+                    }
+                }
+            );
+
+            res.json({
+                success: true
+            });
+        } catch (err) {
+            res.status(500).json({
+                success: false,
+                message: 'Internal Server Error',
+            });
+        }
+    }
+
+
 }
 
 export = AlarmBo;

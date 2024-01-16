@@ -8,6 +8,7 @@ let apiRouters = function () {
     router.post('/api/alarm/save', alarmController.addAlarm);
     router.get('/api/alarms', alarmController.getAllAlarm);
     router.delete('/api/alarm/:alarm_id', alarmController.deleteAlarm)
+    router.patch('/api/alarm/:alarm_id', alarmController.updateAlarmStatus)
 
     return router;
 };
