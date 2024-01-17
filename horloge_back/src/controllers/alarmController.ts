@@ -15,5 +15,8 @@ export = {
     },
     updateAlarmStatus:(req: Request, res: Response, next:NextFunction)=>{
         _alarmBo.updateAlarmStatus(req, res, next)
+    },
+    updateAlarm:(req: Request, res: Response, next:NextFunction)=>{
+        _alarmBo.updateAlarm(req, res, next)
     }
 };
