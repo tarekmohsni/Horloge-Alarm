@@ -1,8 +1,11 @@
 import axios, { AxiosResponse } from "axios";
 
 interface ResponseData {
-    alarms: any,
-    success: boolean
+    AllAlarms: any,
+    success: boolean,
+    totalPages: number,
+    alarmsPerPage: any,
+    count: number
 }
 
 interface AlarmData{
@@ -11,12 +14,18 @@ interface AlarmData{
     description: string
 }
 
+interface AlarmAdd{
+    success: boolean,
+    message: string,
+
+}
+
 class AlarmService {
     getAlarms(params: any): Promise<AxiosResponse<ResponseData>> {
         return axios.get<ResponseData>("http://localhost:2000/api/alarms", { params });
     }
 
-    addAlarm(data: any): Promise<AxiosResponse<AlarmData>> {
+    addAlarm(data: AlarmData): Promise<AxiosResponse<AlarmAdd>> {
         return axios.post("http://localhost:2000/api/alarm/save", data);
     }
 
@@ -26,6 +35,10 @@ class AlarmService {
 
     updateAlarmStatus(alarm_id: number, active: boolean): Promise<AxiosResponse<any>> {
         return axios.patch(`http://localhost:2000/api/alarm/${alarm_id}`, { active });
+    }
+
+    updateAlarm(alarm_id:number, data: AlarmData): Promise<AxiosResponse<any>> {
+        return axios.put(`http://localhost:2000/api/alarm/${alarm_id}`, data)
     }
 
 }

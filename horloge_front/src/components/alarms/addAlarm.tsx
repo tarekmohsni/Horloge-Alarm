@@ -16,21 +16,33 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DemoContainer} from "@mui/x-date-pickers/internals/demo";
 import '../../styles/style.css'
 import alarmsApiService from "../../services/alarmsApiServices";
-import dayjs from "dayjs";
+import dayjs, {Dayjs} from "dayjs";
+import {TableRowData} from "./alamrsList";
+import {clear} from "@testing-library/user-event/dist/clear";
+import {NotifyError, NotifyInfo, NotifySuccess} from "./notification";
 
 interface AddAlarmProps {
     modalAdd: boolean;
     setModal: React.Dispatch<React.SetStateAction<boolean>>;
+    dataAlarm: TableRowData | null;
 }
 const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
+const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal,dataAlarm})=>{
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
-    const [selectedTime, setSelectedTime] = useState<string>('');
+    const [selectedTime, setSelectedTime] = useState<Dayjs | null>(dayjs());
     const [description, setDescription] = useState<string>('');
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [alertMessage, setAlertMessage] = useState<string>('');
 
+    useEffect(() => {
+        if(dataAlarm !== null ){
+            setSelectedDays(dataAlarm.days)
+            const combinedDateTime = dayjs().set('hour', parseInt(dataAlarm.time.split(':')[0])).set('minute', parseInt(dataAlarm.time.split(':')[1]));
+            setSelectedTime(combinedDateTime)
+            setDescription(dataAlarm.description)
+        }
+    }, []);
     const handleClose = () => {
         setModal(!modalAdd);
     };
@@ -45,14 +57,12 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
 
     const handleAddNewAlarm =()=>{
         if (!selectedTime) {
-            setAlertMessage('Le temps est requis.');
-            setShowAlert(true);
+            NotifyInfo('Le temps est requis.');
             return;
         }
 
         if (!selectedDays.length) {
-            setAlertMessage('Au moins un jour doit être sélectionné.');
-            setShowAlert(true);
+            NotifyInfo('Au moins un jour doit être sélectionné.');
             return;
         }
         const objAlarm={
@@ -60,12 +70,33 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
             days: selectedDays,
             description: description
         }
-        console.log("selectedTime", typeof selectedTime)
-        console.log('dataaa', objAlarm)
+        if(dataAlarm !== null){
+            alarmsApiService.updateAlarm(dataAlarm.id,objAlarm).then(result=>{
+                const dataResultEdit=result?.data
+                if(dataResultEdit.success){
+                    setModal(!modalAdd)
+                    NotifySuccess(dataResultEdit?.message)
+                }else{
+                    NotifyError(dataResultEdit?.message)
+                }
+            }).catch(error=>{
+                NotifyError("Please, try again")
+            })
+        }else{
+            alarmsApiService.addAlarm(objAlarm).then(result=>{
+                console.log("result", result)
+                const dataResultAdd=result?.data
+                if(dataResultAdd.success){
+                    setModal(!modalAdd)
+                    NotifySuccess(dataResultAdd?.message)
+                }else{
+                    NotifyError(dataResultAdd?.message)
+                }
+            }).catch(error=>{
+                NotifyError("Please, try again")
+            })
+        }
 
-        alarmsApiService.addAlarm(objAlarm).then(result=>{
-            console.log("result", result)
-        })
     }
 
     const handleTimeChange = (newTime:any) => {
@@ -77,17 +108,13 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
         setDescription(event.target.value);
     };
     return(
+        <div>
         <Dialog
             open={modalAdd}
             keepMounted
             onClose={handleClose}
             aria-describedby="alert-dialog-slide-description"
         >
-            {showAlert && (
-                <Alert severity="error" onClose={() => setShowAlert(false)}>
-                    {alertMessage}
-                </Alert>
-            )}
             <DialogTitle>{"Use Google's location service?"}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-slide-description">
@@ -100,9 +127,11 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
                                         value={selectedTime}
                                         onChange={handleTimeChange}/>
                             {selectedTime && (
+                                <div>
                                 <p>
                                     Heure sélectionnée : {dayjs(selectedTime).format('HH:mm')}
                                 </p>
+                                </div>
                             )}
                         </DemoContainer>
                     </LocalizationProvider>
@@ -137,8 +166,8 @@ const AddAlarm: React.FC<AddAlarmProps> = ({modalAdd,setModal})=>{
                 <Button onClick={handleClose}>Close</Button>
                 <Button onClick={handleAddNewAlarm}>Add Alarm</Button>
             </DialogActions>
-
         </Dialog>
+        </div>
     )
 
 }
