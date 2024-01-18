@@ -3,6 +3,20 @@
     color: blue;
 }
 
-.button {
-    margin-left: 25px;
+.button-add {
+    margin-right: 70%;
+}
+
+.button-table {
+    margin-right: 10px; /* Adjust this value as needed */
+}
+
+.clock-style {
+    margin-left: 38%;
+    margin-bottom: 15%;
+}
+
+.title {
+    color: black;
+    margin-right: 100%;
 }

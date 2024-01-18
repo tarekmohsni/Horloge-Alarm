@@ -17,8 +17,7 @@ function MyClock() {
 
     return (
         <div>
-            <p>Current time:</p>
-            <Clock value={value} />
+            <Clock className="clock-style" value={value} />
             <ListAlarm/>
         </div>
     );
