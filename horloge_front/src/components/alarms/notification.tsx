@@ -12,6 +12,6 @@ const options:ToastOptions = {position: "top-right",
     progress: undefined,
     theme: "light"}
 
-export const NotifySuccess = (message:any) => toast.success(message , options)
-export const NotifyError = (message:any) => toast.error(message,  options)
-export const NotifyInfo = (message:any) => toast.info(message,  options)
+export const NotifySuccess = (message:string) => toast.success(message , options)
+export const NotifyError = (message:string) => toast.error(message,  options)
+export const NotifyInfo = (message:string) => toast.info(message,  options)
